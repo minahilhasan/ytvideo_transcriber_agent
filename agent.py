@@ -32,11 +32,11 @@ Tools:
 
 Rules:
 1. If the input is a topic, respond in JSON:
-   '{ "tool": "search_youtube", "input": "<topic>" }'
+   {{ "tool": "search_youtube", "input": "<topic>" }}
 2. If the input is a YouTube URL, respond in JSON:
-   '{ "tool": "transcribe_video", "input": "<URL>" }'
+   {{ "tool": "transcribe_video", "input": "<URL>" }}
 3. If the task is complete, respond:
-   '{ "tool": "finish", "output": "<final answer>" }'
+   {{ "tool": "finish", "output": "<final answer>" }}
 """
 
     model = genai.GenerativeModel("models/gemini-1.5-pro")
