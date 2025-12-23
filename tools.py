@@ -57,10 +57,11 @@ def videotranscriber(video_url):
         except Exception as e:
             return f"Error downloading video: {e}"
 
-        model = client.generative_model("models/gemini-1.5-pro")
-        response = model.generate_content(
-            input_audio=open(audio_path, "rb"),  # Pass the file object directly
-            instructions="Transcribe this audio accurately."
-        )
+        with open(audio_path, "rb") as audio_file:
+            response = client.audio.speech_to_text(
+                audio=audio_file,
+                model="gemini-1.5",
+                instructions="Transcribe this audio accurately."
+            )
 
     return response.output_text
