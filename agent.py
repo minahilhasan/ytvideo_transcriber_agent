@@ -50,7 +50,7 @@ Rules:
         temperature=0,
     )
 
-    return json.loads(response.text)
+    return json.loads(response.choices[0].message.content)
 
 
 def execute_tool(decision):
