@@ -15,10 +15,20 @@ def aiagent(user_input):
     while True:
         # Ask LLM what to do next
         system_prompt = """
-You are an AI agent. Respond ONLY with JSON with keys 'tool' and 'input':
-1. If the input is a topic: {"tool": "search_youtube", "input": "<topic>"}
-2. If the input is a URL: {"tool": "transcribe_video", "input": "<URL>"}
-3. If the task is complete, respond: {"tool": "finish", "output": "<final answer>"}
+You are an AI agent. Respond ONLY with valid JSON.
+
+Rules:
+- If the input is a topic or search query, call:
+  {"tool": "search_youtube", "input": "<topic>"}
+
+- If the input is a valid YouTube URL, call:
+  {"tool": "transcribe_video", "input": "<URL>"}
+
+- If the input looks like a transcription or long text, STOP and respond:
+  {"tool": "finish", "output": "<the transcription>"}
+
+Never reuse placeholder values like <URL>.
+Never repeat a tool call after transcription.
 """
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
