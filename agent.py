@@ -24,7 +24,7 @@ Rules:
 - If the input is a valid YouTube URL, call:
   {"tool": "transcribe_video", "input": "<URL>"}
 
-- If the input looks like a transcription or long text, STOP and respond:
+- If the input looks like a transcription or text, STOP and respond:
   {"tool": "finish", "output": "<the transcription>"}
 
 Never reuse placeholder values like <URL>.
