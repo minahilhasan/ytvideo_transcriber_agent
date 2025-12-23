@@ -3,7 +3,7 @@ import requests
 import subprocess
 import tempfile
 import os
-import google.generativeai as genai
+from google import genai
 
 def urlFinder(user_query):
     serpai_key = st.secrets["SERPAI"]["SERPAI_API_KEY"]
@@ -27,6 +27,7 @@ def urlFinder(user_query):
 
 def videotranscriber(video_url):
     genai.configure(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
+    client = genai.Client()
 
     with tempfile.TemporaryDirectory() as tmpdir:
         audio_path = os.path.join(tmpdir, "audio.mp3")
@@ -49,7 +50,7 @@ def videotranscriber(video_url):
             mime_type="audio/mpeg"
         )
 
-        model = genai.GenerativeModel("models/gemini-1.5-pro")
+        model = client.GenerativeModel("models/gemini-1.5-pro")
         response = model.generate_content(
             ["Transcribe this audio accurately.", audio_file]
         )
