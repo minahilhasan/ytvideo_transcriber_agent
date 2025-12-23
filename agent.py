@@ -3,60 +3,54 @@ from groq import Groq
 import json
 from tools import urlFinder, videotranscriber
 
-TOOLS = (
-    {
-        "name": "search_youtube",
-        "description": "Search YouTube and return a video URL.",
-        "function": urlFinder,
-    },
-    {
-        "name": "transcribe_video",
-        "description": "Transcribe a YouTube video using its URL.",
-        "function": videotranscriber,
-    },
-)
+TOOLS = {
+    "search_youtube": urlFinder,
+    "transcribe_video": videotranscriber
+}
 
-def aiagent(state):
-    tool_prompt = "\n".join(
-        f"- {tool['name']}: {tool['description']}"
-        for tool in TOOLS
-    )
-
-    client = Groq(
-        api_key=st.secrets["GROQ"]["GROQ_API_KEY"]
-    )
+def aiagent(user_input):
+    """
+    One-shot agent call:
+    - Calls Groq to decide which tool to use
+    - Executes the tool
+    - Returns final output
+    """
+    client = Groq(api_key=st.secrets["GROQ"]["GROQ_API_KEY"])
 
     system_prompt = f"""
-You are an AI agent.
-
-Tools:
-{tool_prompt}
-
-Rules:
-1. If the input is a topic, respond in JSON:
-   {{ "tool": "search_youtube", "input": "<topic>" }}
-2. If the input is a YouTube URL, respond in JSON:
-   {{ "tool": "transcribe_video", "input": "<URL>" }}
-3. If the task is complete, respond:
-   {{ "tool": "finish", "output": "<final answer>" }}
+You are an AI agent. Respond ONLY with JSON:
+1. If the input is a topic: {{ "tool": "search_youtube", "input": "<topic>" }}
+2. If the input is a URL: {{ "tool": "transcribe_video", "input": "<URL>" }}
+3. If the task is complete, respond: {{ "tool": "finish", "output": "<final answer>" }}
+User input: {user_input}
 """
 
+    # Ask LLM which tool to use
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",  
+        model="llama-3.1-8b-instant",
         messages=[
-            {"role": "system","content": "Respond ONLY with valid JSON. Include keys: tool, output."},
+            {"role": "system", "content": "Respond ONLY with valid JSON with keys 'tool' and 'input'."},
             {"role": "user", "content": system_prompt},
         ],
-        temperature=0,
+        temperature=0
     )
 
-    return json.loads(response.choices[0].message.content)
+    try:
+        decision = json.loads(response.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"tool": "finish", "output": "Failed to parse LLM JSON."}
 
+    # Run the tool if not finished
+    tool_name = decision.get("tool")
+    if tool_name == "finish":
+        return {"tool": "finish", "output": decision.get("output", "<no output>")}
 
-def execute_tool(decision):
-    for tool in TOOLS:
-        if tool["name"] == decision["tool"]:
-            return tool["function"](decision["input"])
-    return None
+    if tool_name in TOOLS:
+        result = TOOLS[tool_name](decision["input"])
+        return {"tool": "finish", "output": result}
+
+    # fallback
+    return {"tool": "finish", "output": "<unknown tool>"}
+
 
     
