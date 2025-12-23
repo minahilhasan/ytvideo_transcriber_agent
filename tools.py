@@ -57,15 +57,9 @@ def videotranscriber(video_url):
         except Exception as e:
             return f"Error downloading video: {e}"
 
-        # Upload audio to Gemini
-        audio_file = client.upload_file(
-            path=audio_path,
-            mime_type="audio/mpeg"
-        )
-
         model = client.generative_model("models/gemini-1.5-pro")
         response = model.generate_content(
-            input_audio=audio_file,
+            input_audio=open(audio_path, "rb"),  # Pass the file object directly
             instructions="Transcribe this audio accurately."
         )
 
