@@ -1,5 +1,5 @@
 import streamlit as st
-import groq import Groq
+from groq import Groq
 import json
 from tools import urlFinder, videotranscriber
 
