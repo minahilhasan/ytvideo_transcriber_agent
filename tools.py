@@ -48,10 +48,14 @@ def videotranscriber(video_url):
                 check=True
             )
         except subprocess.CalledProcessError as e:
-            return f"Failed to download or extract audio: {e}"
+            return {
+                "output":"Failed to download or extract audio: {e}"
+            }
 
         if not os.path.exists(audio_path):
-            return "Audio file was not created."
+             return {
+                "output":"Audio file was not created."
+            }
 
         try:
             model = client.audio.transcriptions.create(
@@ -59,7 +63,12 @@ def videotranscriber(video_url):
                 model="gemini-1.5-pro",
                 instructions="Transcribe this audio accurately."
             )
-            return model.text
+            return {
+                "output": model.text
+            }
         except Exception as e:
-            return f"Error during transcription: {e}"
+            return {
+                "output":f"Error during transcription: {e}"
+            }
+            
 
