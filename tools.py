@@ -30,7 +30,7 @@ def urlFinder(user_query):
 
 
 def videotranscriber(video_url):
-    client = genaiClient(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
+    client = genai.Client(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
 
     with tempfile.TemporaryDirectory() as tmpdir:
         audio_path = os.path.join(tmpdir, "audio.mp4")
