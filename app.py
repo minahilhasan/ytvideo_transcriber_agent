@@ -14,6 +14,7 @@ def main():
       
     decision = aiagent(state)
     while decision["tool"] != "finish":
+        time.sleep(2) 
         result = execute_tool(decision)
         state += f"\n{decision['tool']} result: {result}"   
         decision = aiagent(state)
