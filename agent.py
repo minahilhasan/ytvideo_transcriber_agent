@@ -13,7 +13,7 @@ def aiagent(user_input):
     current_input = user_input
 
     while True:
-        # Ask LLM what to do next
+
         system_prompt = """
 You are an AI agent. Respond ONLY with valid JSON.
 
