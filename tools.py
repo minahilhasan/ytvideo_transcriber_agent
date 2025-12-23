@@ -39,17 +39,17 @@ def videotranscriber(video_url):
             subprocess.run(
                 [
                     "yt-dlp",
-                    "-f", "bestaudio",
-                    "--extractor-args", "youtube:player_client=android",
+                    "-f", "bestaudio/best",
                     "-x", "--audio-format", "mp3",
                     "-o", audio_path,
                     video_url,
                 ],
                 check=True
             )
+
         except subprocess.CalledProcessError as e:
             return {
-                "output":"Failed to download or extract audio: {e}"
+                "output":f"Failed to download or extract audio: {e}"
             }
 
         if not os.path.exists(audio_path):
