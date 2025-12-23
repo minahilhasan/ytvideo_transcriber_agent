@@ -39,7 +39,7 @@ def videotranscriber(video_url):
             subprocess.run(
                 [
                     "yt-dlp",
-                    "-f", "bestaudio/best",
+                    "-f", "bestaudio/best",                # fallback if bestaudio fails
                     "-x", "--audio-format", "mp3",
                     "-o", audio_path,
                     "--user-agent",
