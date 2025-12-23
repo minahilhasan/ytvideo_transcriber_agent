@@ -6,7 +6,7 @@ import tempfile
 import subprocess
 import os
 from google import genai
-from genai import Client as genaiClient
+
 
 def urlFinder(user_query):
     serpai_key = st.secrets["SERPAI"]["SERPAI_API_KEY"]
@@ -27,32 +27,33 @@ def urlFinder(user_query):
 
     return results[0]["link"]  # return ONLY URL
 
+def videotranscriber(video_url): 
+    client = genai.Client(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"]) 
+    with tempfile.TemporaryDirectory() as tmpdir: 
+        audio_path = os.path.join(tmpdir, "audio.mp3") 
+        # Download audio from YouTube 
+        try: 
+            subprocess.run( 
+                [ "yt-dlp", 
+                 "--js-runtimes", 
+                 "node", 
+                 "-f", "bestaudio", 
+                 "-x", "--audio-format", 
+                 "mp3", 
+                 "-o", audio_path, 
+                 "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " 
+                 "AppleWebKit/537.36 (KHTML, like Gecko) " "Chrome/118.0.5993.90 Safari/537.36", 
+                 video_url 
+                ], 
+                check=True ) 
+        except subprocess.CalledProcessError as e: 
+            return f"Failed to download or extract audio: {e}"
+            if not os.path.exists(audio_path): 
+                return "Audio file was not created. Download may have failed." 
+            try: 
+                model = client.audio.transcriptions.create( file=open(audio_path, "rb"), 
+                    model="gemini-1.5-pro", instructions="Transcribe this audio accurately." ) 
+                return model.text 
+            except Exception as e: 
+                return f"Error during transcription: {e}"
 
-
-def videotranscriber(video_url):
-    client = genai.Client(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        audio_path = os.path.join(tmpdir, "audio.mp4")
-
-        # Download audio using pytube
-        try:
-            yt = YouTube(video_url)
-            audio_stream = yt.streams.filter(only_audio=True).first()
-            if not audio_stream:
-                return "No audio streams available for this video."
-            audio_stream.download(output_path=tmpdir, filename="audio.mp4")
-        except Exception as e:
-            return f"Failed to download audio: {e}"
-
-        # Transcribe audio
-        try:
-            with open(audio_path, "rb") as f:
-                transcript = client.audio.transcriptions.create(
-                    file=f,
-                    model="gemini-1.5-pro",
-                    instructions="Transcribe this audio accurately."
-                )
-            return transcript.text
-        except Exception as e:
-            return f"Error during transcription: {e}"
