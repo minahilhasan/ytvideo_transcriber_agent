@@ -3,4 +3,5 @@ requests
 google-genai
 groq
 yt-dlp==2025.12.8
+pytube>=15.0.0
 
