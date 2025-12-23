@@ -29,13 +29,10 @@ def videotranscriber(video_url):
     client = genai.Client(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        # Output path for audio
-        audio_path = os.path.join(tmpdir, "audio.mp3")
-
-        # yt-dlp options
+        # Use a template for yt-dlp
         ydl_opts = {
             "format": "bestaudio/best",
-            "outtmpl": audio_path,
+            "outtmpl": os.path.join(tmpdir, "%(title)s.%(ext)s"),  # temp filename template
             "quiet": True,
             "nocheckcertificate": True,
             "ignoreerrors": True,
@@ -54,9 +51,16 @@ def videotranscriber(video_url):
                 info = ydl.extract_info(video_url, download=True)
                 if info is None:
                     return "Failed to download or extract audio."
+
+                # After extraction, yt-dlp creates the mp3 file with the title
+                audio_path = os.path.join(tmpdir, f"{info['title']}.mp3")
+                if not os.path.exists(audio_path):
+                    return "Audio file not found after download."
+
         except Exception as e:
             return f"Error downloading video: {e}"
 
+        # Transcribe audio using Gemini API
         with open(audio_path, "rb") as audio_file:
             response = client.audio.speech_to_text(
                 audio=audio_file,
@@ -64,4 +68,4 @@ def videotranscriber(video_url):
                 instructions="Transcribe this audio accurately."
             )
 
-    return response.output_text
+    return response.text
