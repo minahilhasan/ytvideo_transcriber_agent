@@ -9,12 +9,6 @@ TOOLS = {
 }
 
 def aiagent(user_input):
-    """
-    One-shot agent call:
-    - Calls Groq to decide which tool to use
-    - Executes the tool
-    - Returns final output
-    """
     client = Groq(api_key=st.secrets["GROQ"]["GROQ_API_KEY"])
 
     system_prompt = f"""
