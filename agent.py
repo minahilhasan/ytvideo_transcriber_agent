@@ -25,7 +25,6 @@ You are an AI agent. Respond ONLY with JSON:
 User input: {user_input}
 """
 
-    # Ask LLM which tool to use
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=[
@@ -40,7 +39,6 @@ User input: {user_input}
     except json.JSONDecodeError:
         return {"tool": "finish", "output": "Failed to parse LLM JSON."}
 
-    # Run the tool if not finished
     tool_name = decision.get("tool")
     if tool_name == "finish":
         return {"tool": "finish", "output": decision.get("output", "<no output>")}
@@ -49,7 +47,6 @@ User input: {user_input}
         result = TOOLS[tool_name](decision["input"])
         return {"tool": "finish", "output": result}
 
-    # fallback
     return {"tool": "finish", "output": "<unknown tool>"}
 
 
