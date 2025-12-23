@@ -26,8 +26,7 @@ def urlFinder(user_query):
 
 
 def videotranscriber(video_url):
-    genai.configure(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
-    client = genai.Client()
+    client = genai.Client(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
 
     with tempfile.TemporaryDirectory() as tmpdir:
         audio_path = os.path.join(tmpdir, "audio.mp3")
@@ -45,14 +44,15 @@ def videotranscriber(video_url):
                 )
         except subprocess.CalledProcessError:
             return "Failed to download or extract audio."
-        audio_file = genai.upload_file(
+        audio_file = client.upload_file(
             path=audio_path,
             mime_type="audio/mpeg"
         )
 
-        model = client.GenerativeModel("models/gemini-1.5-pro")
+        model = client.generative_model("models/gemini-1.5-pro")
         response = model.generate_content(
-            ["Transcribe this audio accurately.", audio_file]
+            input_audio=audio_file,
+            instructions="Transcribe this audio accurately."
         )
 
-    return response.text
+    return response.output_text
