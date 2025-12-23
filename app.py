@@ -10,9 +10,9 @@ def main():
     )
 
    if st.button("Run Agent") and user_request.strip():
-    st.write("Running agent...")
-    decision = aiagent(user_input)
-    st.write(decision["output"])
+        st.write("Running agent...")
+        decision = aiagent(user_input)
+        st.write(decision["output"])
 
 
 if __name__ == "__main__":
