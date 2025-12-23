@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import yt_dlp
+from pytube import YouTube
 import tempfile
 import subprocess
 import os
@@ -26,46 +27,31 @@ def urlFinder(user_query):
     return results[0]["link"]  # return ONLY URL
 
 
+
 def videotranscriber(video_url):
-    # Initialize Gemini client
-    client = genai.Client(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
+    client = genaiClient(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
 
-    # Temporary directory to store audio
     with tempfile.TemporaryDirectory() as tmpdir:
-        audio_path = os.path.join(tmpdir, "audio.mp3")
+        audio_path = os.path.join(tmpdir, "audio.mp4")
 
-        # Download audio from YouTube
+        # Download audio stream
         try:
-            subprocess.run(
-                [
-                    "yt-dlp",
-                    "--js-runtimes", "node",        # Ensure JS-extracted formats work
-                    "-f", "bestaudio",
-                    "-x",
-                    "--audio-format", "mp3",
-                    "-o", audio_path,
-                    "--user-agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/118.0.5993.90 Safari/537.36",
-                    video_url
-                ],
-                check=True
-            )
-        except subprocess.CalledProcessError as e:
-            return f"Failed to download or extract audio: {e}"
+            yt = YouTube(video_url)
+            audio_stream = yt.streams.filter(only_audio=True).first()
+            if not audio_stream:
+                return "No audio streams available for this video."
+            audio_stream.download(output_path=tmpdir, filename="audio.mp4")
+        except Exception as e:
+            return f"Failed to download audio: {e}"
 
-        # Ensure file exists
-        if not os.path.exists(audio_path):
-            return "Audio file was not created. Download may have failed."
-
-        # Transcribe audio using Gemini API
+        # Transcribe using Gemini API
         try:
-            model = client.audio.transcriptions.create(
-                file=open(audio_path, "rb"),
-                model="gemini-1.5-pro",
-                instructions="Transcribe this audio accurately."
-            )
-            return model.text
+            with open(audio_path, "rb") as f:
+                transcript = client.audio.transcriptions.create(
+                    file=f,
+                    model="gemini-1.5-pro",
+                    instructions="Transcribe this audio accurately."
+                )
+            return transcript.text
         except Exception as e:
             return f"Error during transcription: {e}"
