@@ -42,10 +42,15 @@ def videotranscriber(video_url):
                     "-f", "bestaudio/best",
                     "-x", "--audio-format", "mp3",
                     "-o", audio_path,
+                    "--user-agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/118.0.5993.90 Safari/537.36",
                     video_url,
                 ],
                 check=True
             )
+
 
         except subprocess.CalledProcessError as e:
             return {
