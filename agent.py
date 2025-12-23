@@ -22,7 +22,7 @@ def aiagent(state):
         for tool in TOOLS
     )
 
-     client = Groq(
+    client = Groq(
         api_key=st.secrets["GROQ"]["GROQ_API_KEY"]
     )
 
