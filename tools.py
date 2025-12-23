@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-import subprocess
+import yt_dlp
 import tempfile
 import os
 from google import genai
@@ -29,23 +29,35 @@ def videotranscriber(video_url):
     client = genai.Client(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
 
     with tempfile.TemporaryDirectory() as tmpdir:
+        # Output path for audio
         audio_path = os.path.join(tmpdir, "audio.mp3")
-        try:
-            subprocess.run(
-                [
-                    "yt-dlp",
-                    "-f", "bestaudio",
-                    "-x",
-                    "--audio-format", "mp3",
-                    "-o", audio_path,
-                    "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.90 Safari/537.36",
-                    video_url
-                ],
-                check=True
-            )
 
-        except subprocess.CalledProcessError:
-            return "Failed to download or extract audio."
+        # yt-dlp options
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": audio_path,
+            "quiet": True,
+            "nocheckcertificate": True,
+            "ignoreerrors": True,
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }
+            ],
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.90 Safari/537.36"
+        }
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(video_url, download=True)
+                if info is None:
+                    return "Failed to download or extract audio."
+        except Exception as e:
+            return f"Error downloading video: {e}"
+
+        # Upload audio to Gemini
         audio_file = client.upload_file(
             path=audio_path,
             mime_type="audio/mpeg"
