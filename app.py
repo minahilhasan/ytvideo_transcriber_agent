@@ -11,7 +11,7 @@ def main():
    
     if st.button("Run Agent") and user_request.strip():
         st.write("Running agent...")
-        decision = aiagent(user_input)
+        decision = aiagent(user_request)
         st.write(decision["output"])
 
 
