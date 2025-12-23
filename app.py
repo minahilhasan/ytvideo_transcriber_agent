@@ -38,7 +38,7 @@ def main():
             steps += 1
 
         st.session_state.running = False
-        st.write(result["output"])
+        st.write(decision.get("output", "<no output>"))
 
 
 if __name__ == "__main__":
