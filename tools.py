@@ -6,6 +6,7 @@ import tempfile
 import subprocess
 import os
 from google import genai
+from genai import Client as genaiClient
 
 def urlFinder(user_query):
     serpai_key = st.secrets["SERPAI"]["SERPAI_API_KEY"]
@@ -34,7 +35,7 @@ def videotranscriber(video_url):
     with tempfile.TemporaryDirectory() as tmpdir:
         audio_path = os.path.join(tmpdir, "audio.mp4")
 
-        # Download audio stream
+        # Download audio using pytube
         try:
             yt = YouTube(video_url)
             audio_stream = yt.streams.filter(only_audio=True).first()
@@ -44,7 +45,7 @@ def videotranscriber(video_url):
         except Exception as e:
             return f"Failed to download audio: {e}"
 
-        # Transcribe using Gemini API
+        # Transcribe audio
         try:
             with open(audio_path, "rb") as f:
                 transcript = client.audio.transcriptions.create(
