@@ -44,7 +44,7 @@ Rules:
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",  
         messages=[
-            {"role": "system", "content": "You must respond with valid JSON only."},
+            {"role": "system","content": "Respond ONLY with valid JSON. Include keys: tool, output."},
             {"role": "user", "content": system_prompt},
         ],
         temperature=0,
