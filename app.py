@@ -15,7 +15,7 @@ def main():
         url=decision["output"]
         st.write(f"The url extracted by the agent is: {url}")
         decision=aiagent(url)
-        st.write(decision["output"]
+        st.write(decision["output"])
 
 
 if __name__ == "__main__":
