@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+import groq import Groq
 import json
 from tools import urlFinder, videotranscriber
 
@@ -22,7 +22,9 @@ def aiagent(state):
         for tool in TOOLS
     )
 
-    genai.configure(api_key=st.secrets["GEMINI"]["GEMINI_API_KEY"])
+     client = Groq(
+        api_key=st.secrets["GROQ"]["GROQ_API_KEY"]
+    )
 
     system_prompt = f"""
 You are an AI agent.
@@ -39,8 +41,14 @@ Rules:
    {{ "tool": "finish", "output": "<final answer>" }}
 """
 
-    model = genai.GenerativeModel("models/gemini-1.5-pro")
-    response = model.generate_content(system_prompt)
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",  
+        messages=[
+            {"role": "system", "content": "You must respond with valid JSON only."},
+            {"role": "user", "content": system_prompt},
+        ],
+        temperature=0,
+    )
 
     return json.loads(response.text)
 
