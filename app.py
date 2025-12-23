@@ -11,11 +11,9 @@ def main():
    
     if st.button("Run Agent") and user_request.strip():
         st.write("Running agent...")
-        decision = aiagent(user_request)
-        url=decision["output"]
-        st.write(f"The url extracted by the agent is: {url}")
-        decision=aiagent(url)
-        st.write(decision["output"])
+        result = aiagent(user_request)
+        st.subheader("Final Output")
+        st.write(result)
 
 
 if __name__ == "__main__":
