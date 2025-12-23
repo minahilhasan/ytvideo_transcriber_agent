@@ -47,7 +47,20 @@ def videotranscriber(video_url):
         ]
 
         try:
-            subprocess.run(ytdlp_cmd, check=True)
+            subprocess.run(
+                [
+                    "yt-dlp",
+                    "--js-runtimes", "node",
+                    "-f", "bestaudio",
+                    "-x",
+                    "--audio-format", "mp3",
+                    "-o", audio_path,
+                    "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.5993.90 Safari/537.36",
+                    "--cookies", "/path/to/cookies.txt",  # optional if needed
+                    video_url
+                ],
+                check=True
+            )
         except subprocess.CalledProcessError as e:
             return f"Error downloading video: {e}"
 
