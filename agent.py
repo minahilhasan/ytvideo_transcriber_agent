@@ -44,8 +44,12 @@ You are an AI agent. Respond ONLY with JSON with keys 'tool' and 'input':
             st.info(f"Calling tool: {tool_name} with input: {tool_input}")
             tool_result = TOOLS[tool_name](tool_input)
 
-            # Feed the tool result back to the LLM only if needed
-            current_input = tool_result
+
+            if isinstance(tool_result, dict):
+                current_input = tool_result.get("output", "")
+            else:
+                current_input = str(tool_result)
+
         else:
             return f"<unknown tool: {tool_name}>"
 
